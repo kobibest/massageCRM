@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
+    <title>WhatsApp Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            background-color: #008069;
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-name {
+            font-weight: bold;
+        }
+
+        .contact-email {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #efeae2;
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAFISURBVDiNrdQ/S1xBFMbx3733bkQQJI2NVQJpUvgBBEEQRBBE0EIQxE5BJJ1gYeM3sLO0sbCxEQsLCz9AihQiKIiNWBgICX/u3XtOCrMhZFk3q08zZ2bOj3nOGWaYwynG0YujVLAZk5jFG3SpxbCsxWVkRMb1ULBboYYkSbvRY6YoRCplKWN4il8YaSH38AKPsI9f+I4j/EA/PuNrq1VaJV3gAhMYQwev8QEP8Rb3/ueDD/EJ8y3jQ6zhHT4i/cvg2/0PcKxLYVXvHndxF98wj1n0tZLyIoxKWRaSXBVuk8QkyXGapnvdbvewLEs1z/PtVLFYhXBRhVQXZRkZz7MsG6/X699DCLt1Xe/iZS/AGnqzJJkvQjgvy3K1qqptTKGBh3/z2yxwA1OYwriqolmSnOV5vl/X9Vbv2ev3/wDSIy2UVCsRmQAAAABJRU5ErkJggg==");
+        }
+
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            max-width: 65%;
+            padding: 8px 12px;
+            border-radius: 7.5px;
+            position: relative;
+            margin: 4px 0;
+        }
+
+        .message.incoming {
+            align-self: flex-start;
+            background-color: white;
+        }
+
+        .message.outgoing {
+            align-self: flex-end;
+            background-color: #d9fdd3;
+        }
+
+        .message-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            font-size: 0.75em;
+            color: #667781;
+        }
+
+        .message-text {
+            margin-bottom: 4px;
+        }
+
+        .read-status {
+            font-size: 1.1em;
+        }
+
+        .read-status.read {
+            color: #53bdeb;
+        }
+
+        .input-box {
+            background-color: #f0f2f5;
+            padding: 10px;
+            border-top: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background-color: white;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .input-container input[type="text"] {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 15px;
+        }
+
+        .input-container button {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: #54656f;
+        }
+
+        .input-container button[type="submit"] {
+            background-color: #008069;
+            color: white;
+            border-radius: 4px;
+            padding: 8px 16px;
+        }
+
+        .file-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .file-icon {
+            font-size: 1.5em;
+        }
+
+        .file-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-name {
+            font-weight: 500;
+        }
+
+        .file-type {
+            font-size: 0.8em;
+            color: #667781;
+        }
+
+        .quick-messages-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .quick-message-add {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .quick-message-add input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .quick-message-add button {
+            padding: 8px 16px;
+            background-color: #008069;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .quick-messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .quick-message-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .quick-message-item button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .quick-message-item button.remove-button {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .upload-button,
+        .quick-messages-button {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #54656f;
+        }
+
+        .upload-button:hover,
+        .quick-messages-button:hover {
+            background-color: #f0f2f5;
+            border-radius: 50%;
+        }
+
+        .message-image {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+
+        .message-caption {
+            margin-top: 4px;
+            font-size: 0.9em;
+        }
+        .input-container textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 15px;
+            resize: none;
+            max-height: 100px;
+            min-height: 40px;
+            font-family: inherit;
+        }
+
+        .input-container {
+            min-height: 56px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+<script type="text/babel">
+    function WhatsAppViewer() {
+        const [messages, setMessages] = React.useState([]);
+        const [loading, setLoading] = React.useState(true);
+        const [error, setError] = React.useState(null);
+        const [newMessage, setNewMessage] = React.useState("");
+        const [phoneNumber, setPhoneNumber] = React.useState("");
+        const [contactInfo, setContactInfo] = React.useState(null);
+        const [showQuickMessages, setShowQuickMessages] = React.useState(false);
+        const [quickMessages, setQuickMessages] = React.useState(() => {
+            const saved = localStorage.getItem('quickMessages');
+            return saved ? JSON.parse(saved) : [
+                'תודה רבה!',
+                'בבדיקה, אחזור אליך בהקדם',
+                'אני זמין/ה כעת לשיחה',
+            ];
+        });
+        const [newQuickMessage, setNewQuickMessage] = React.useState('');
+        const messagesEndRef = React.useRef(null);
+        const fileInputRef = React.useRef(null);
+        
+        const scrollToBottom = () => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        };
+
+        React.useEffect(() => {
+            localStorage.setItem('quickMessages', JSON.stringify(quickMessages));
+        }, [quickMessages]);
+
+        const fetchContactInfo = async (phone) => {
+            try {
+                const cleanPhone = phone.replace(/\D/g, '');
+                const fullPhone = cleanPhone.startsWith('972') 
+                    ? cleanPhone 
+                    : `972${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}`;
+
+                const response = await fetch(
+                    "https://7103.api.greenapi.com/waInstance7103152014/getContactInfo/e10c41a7869c4ddba41fc62cf1d2fb30272042cc833a4ecdbd",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            chatId: `${fullPhone}@c.us`,
+                        }),
+                    }
+                );
+
+                const data = await response.json();
+                setContactInfo(data);
+            } catch (err) {
+                console.error("Error fetching contact info:", err);
+            }
+        };
+
+        async function fetchMessages(phone, isInitialFetch = true) {
+        try {
+            const cleanPhone = phone.replace(/\D/g, '');
+            const fullPhone = cleanPhone.startsWith('972') 
+                ? cleanPhone 
+                : `972${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}`;
+
+            const chatId = `${fullPhone}@c.us`;
+            console.log('Fetching messages for chatId:', chatId); // לוג נוסף
+
+            const response = await fetch(
+                "https://7103.api.greenapi.com/waInstance7103152014/getChatHistory/e10c41a7869c4ddba41fc62cf1d2fb30272042cc833a4ecdbd",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        chatId: chatId,
+                        count: 999,
+                    }),
+                }
+            );
+
+            console.log('Response status:', response.status); // הדפסת סטטוס התגובה
+            console.log('Response status text:', response.statusText); // הדפסת טקסט הסטטוס
+            
+            const responseData = await response.json();
+            console.log('Response data:', responseData); // הדפסת הנתונים מהתגובה
+
+            if (!response.ok) {
+                throw new Error(`שגיאה בטעינת ההודעות: ${responseData.message}`);
+            }
+
+            const sortedData = responseData.reverse();
+            
+            if (isInitialFetch) {
+                setMessages(sortedData);
+                setLoading(false);
+                setTimeout(scrollToBottom, 100);
+            } else {
+                if (sortedData.length > 0 && messages.length > 0) {
+                    const lastNewMessageId = sortedData[sortedData.length - 1].idMessage;
+                    const lastCurrentMessageId = messages[messages.length - 1].idMessage;
+                    
+                    if (lastNewMessageId !== lastCurrentMessageId) {
+                        const newMessage = sortedData[sortedData.length - 1];
+                        setMessages(prevMessages => [...prevMessages, newMessage]);
+                        if (newMessage.type === "incoming") {
+                            setTimeout(scrollToBottom, 100);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            if (isInitialFetch) {
+                setError(err.message);
+                setLoading(false);
+            }
+        }
+    }
+
+        React.useEffect(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const phone = urlParams.get("phone");
+
+            if (!phone) {
+                setError("יש להזין מספר טלפון ב-URL");
+                setLoading(false);
+                return;
+            }
+
+            setPhoneNumber(phone);
+            fetchContactInfo(phone);
+            fetchMessages(phone, true);
+
+            const refreshInterval = setInterval(() => {
+                fetchMessages(phone, false);
+            }, 3000);
+
+            return () => clearInterval(refreshInterval);
+        }, []);
+
+        const formatTimestamp = (timestamp) => {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleTimeString("he-IL", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+            });
+        };
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            
+            if (!newMessage.trim()) return;
+
+            if (!phoneNumber) {
+                console.error('No phone number available');
+                return;
+            }
+
+            const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+            
+            const payload = {
+                chatId: `${cleanPhoneNumber}@c.us`,
+                message: newMessage
+            };
+            
+            try {
+                const response = await fetch(
+                    "https://7103.api.greenapi.com/waInstance7103152014/sendMessage/e10c41a7869c4ddba41fc62cf1d2fb30272042cc833a4ecdbd",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+                const responseData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(`Error sending message: ${JSON.stringify(responseData)}`);
+                }
+
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        idMessage: responseData.idMessage || Date.now().toString(),
+                        type: "outgoing",
+                        typeMessage: "textMessage",
+                        textMessage: newMessage,
+                        timestamp: Math.floor(Date.now() / 1000),
+                        statusMessage: "sent"
+                    }
+                ]);
+
+                setNewMessage("");
+                setTimeout(scrollToBottom, 100);
+            } catch (err) {
+                console.error('Full error:', err);
+                alert(`שגיאה בשליחת ההודעה: ${err.message}`);
+            }
+        };
+
+        const handleFileUpload = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('chatId', `${phoneNumber}@c.us`);
+            formData.append('file', file);
+            formData.append('fileName', file.name);
+
+            try {
+                const response = await fetch(
+                    "https://7103.api.greenapi.com/waInstance7103152014/sendFileByUpload/e10c41a7869c4ddba41fc62cf1d2fb30272042cc833a4ecdbd",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('שגיאה בשליחת הקובץ');
+                }
+
+                const data = await response.json();
+                
+                setMessages(prev => [...prev, {
+                    idMessage: data.idMessage,
+                    type: "outgoing",
+                    typeMessage: "documentMessage",
+                    fileName: file.name,
+                    mimeType: file.type,
+                    downloadUrl: data.urlFile,
+                    timestamp: Math.floor(Date.now() / 1000),
+                    statusMessage: "sent"
+                }]);
+
+                setTimeout(scrollToBottom, 100);
+            } catch (err) {
+                console.error('Error uploading file:', err);
+                alert('שגיאה בשליחת הקובץ: ' + err.message);
+            }
+        };
+
+        const addQuickMessage = () => {
+            if (newQuickMessage.trim()) {
+                setQuickMessages(prev => [...prev, newQuickMessage.trim()]);
+                setNewQuickMessage('');
+            }
+        };
+
+        const removeQuickMessage = (index) => {
+            setQuickMessages(prev => prev.filter((_, i) => i !== index));
+        };
+
+        const selectQuickMessage = (message) => {
+            setNewMessage(prev => prev + (prev ? ' ' : '') + message);
+            setShowQuickMessages(false);
+        };
+
+        const renderMessageContent = (message) => {
+            if (message.typeMessage === "imageMessage") {
+                const thumbnailSrc = message.jpegThumbnail 
+                    ? `data:image/jpeg;base64,${message.jpegThumbnail}`
+                    : message.downloadUrl;
+                    
+                return (
+                    <div className="message-content">
+                        <a href={message.downloadUrl} target="_blank" rel="noopener noreferrer">
+                            <img 
+                                src={thumbnailSrc}
+                                alt="תמונה שנשלחה" 
+                                className="message-image"
+                                loading="lazy"
+                            />
+                        </a>
+                        {message.caption && (
+                            <div className="message-caption">
+                                {message.caption}
+                            </div>
+                        )}
+                    </div>
+                );
+            } else if (message.typeMessage === "documentMessage") {
+                return (
+                    <a
+                        href={message.downloadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="file-message"
+                    >
+                        <span className="file-icon">
+                            {message.mimeType.includes("pdf") ? "📄" : "📎"}
+                        </span>
+                        <div className="file-info">
+                            <div className="file-name">{message.fileName}</div>
+                            <div className="file-type">{message.mimeType}</div>
+                        </div>
+                    </a>
+                );
+            }
+            return <div className="message-text">{message.textMessage}</div>;
+        };
+
+        if (loading) {
+            return (
+                <div className="app">
+                    <div className="header">טוען...</div>
+                </div>
+            );
+        }
+
+        if (error) {
+            return (
+                <div className="app">
+                    <div className="header">{error}</div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="app">
+                <div className="header">
+                    <div className="contact-info">
+                        {contactInfo?.avatar && (
+                            <img
+                                src={contactInfo.avatar}
+                                alt="Profile"
+                                className="contact-avatar"
+                            />
+                        )}
+                        <div className="contact-details">
+                            <div className="contact-name">
+                                {contactInfo?.name || contactInfo?.contactName || phoneNumber || "איש קשר"}
+                            </div>
+                            {contactInfo?.email && (
+                                <div className="contact-email">{contactInfo.email}</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="chat">
+                    <div className="messages">
+                        {messages.map((message) => (
+                            <div
+                                key={message.idMessage}
+                                className={`message ${
+                                    message.type === "outgoing" ? "outgoing" : "incoming"
+                                }`}
+                            >
+                                {renderMessageContent(message)}
+                                <div className="message-footer">
+                                    <div className="message-time">
+                                        {formatTimestamp(message.timestamp)}
+                                    </div>
+                                    {message.type === "outgoing" && (
+                                        <div className={`read-status ${message.statusMessage || "sent"}`}>
+                                            {message.statusMessage === "read"
+                                                ? "✓✓"
+                                                : message.statusMessage === "delivered"
+                                                ? "✓✓"
+                                                : "✓"}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </div>
+                </div>
+
+                <div className="input-box">
+                  <form onSubmit={handleSubmit} className="input-container">
+                      <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileUpload}
+                          style={{ display: 'none' }}
+                      />
+                      <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="upload-button"
+                      >
+                          📎
+                      </button>
+                      <button
+                          type="button"
+                          onClick={() => setShowQuickMessages(!showQuickMessages)}
+                          className="quick-messages-button"
+                      >
+                          ⚡
+                      </button>
+                      {showQuickMessages && (
+                          <div className="quick-messages-popup">
+                              <div className="quick-message-add">
+                                  <input
+                                      type="text"
+                                      value={newQuickMessage}
+                                      onChange={(e) => setNewQuickMessage(e.target.value)}
+                                      placeholder="הוסף הודעה מהירה חדשה"
+                                  />
+                                  <button type="button" onClick={addQuickMessage}>הוסף</button>
+                              </div>
+                              <div className="quick-messages-list">
+                                  {quickMessages.map((msg, index) => (
+                                      <div key={index} className="quick-message-item">
+                                          <button
+                                              type="button"
+                                              onClick={() => selectQuickMessage(msg)}
+                                          >
+                                              {msg}
+                                          </button>
+                                          <button
+                                              type="button"
+                                              onClick={() => removeQuickMessage(index)}
+                                              className="remove-button"
+                                          >
+                                              ✕
+                                          </button>
+                                      </div>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+                      <textarea
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleSubmit(e);
+                              }
+                          }}
+                          placeholder="הקלד/י הודעה"
+                          rows={1}
+                      />
+                      <button type="submit">שלח</button>
+                  </form>
+                </div>
+            </div>
+        );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<WhatsAppViewer />);
+</script>
+</body>
+</html>
